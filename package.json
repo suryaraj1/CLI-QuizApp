@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "chalk": "^4.1.0",
+    "node-emoji": "^1.10.0",
     "readline-sync": "^1.4.10"
   }
 }

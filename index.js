@@ -1,25 +1,27 @@
 const readlineSync = require('readline-sync');
+const chalk = require('chalk');
+const emoji = require('node-emoji');
 // score obtained by the user
 let score = 0;
 // total score for the quiz -> updates with new questions being added or removed
-let totalScore = 0; 
+let totalScore = 0;
 // bonus for a correct answer
 const DELTA = 10;
 
 // greeting message
 const welcomeMessage = () => {
     const userName = readlineSync.question("Hello there! Please enter your name..\n");
-    console.log(`Hello ${userName}, welcome to the Quiz!`);
+    console.log(chalk.green(`Hello ${userName}, welcome to the Quiz!` + emoji.get('fire')));
     console.log();
     console.log("------------------------------------------------------");
     console.log("******************************************************");
-    console.log("               ____________________                   ");
-    console.log("              |                    |                  ");
-    console.log("              | Welcome to CP-Quiz |                  ");
-    console.log("              |____________________|                  ");
+    console.log("               _____________________                   ");
+    console.log("              |                     |                  ");
+    console.log("              | Welcome to CLI-QUIZ |                  ");
+    console.log("              |_____________________|                  ");
     console.log();
-    console.log("  A CLI Quiz app for programming contest enthusiasts  ");
-    console.log("           Made with <3 and JavaScript                ");
+    console.log("  A CLI Quiz app for budding JavaScript programmers   ");
+    console.log(`            Made with ${emoji.get('heart')}  and ${chalk.green('JavaScript')}               `);
     console.log();
     console.log("******************************************************");
     console.log("------------------------------------------------------");
@@ -30,27 +32,27 @@ const instructions = () => {
     for (let i = 0; i < 2; i++)
         console.log();
 
-    console.log(" -------------------------------<< INSTRUCTIONS >>----------------------------------------");
-    console.log("|                                                                                         |");
-    console.log("| * Here you would be presented with 5 questions related to programming contests          |");
-    console.log("| * Each question would have a statement                                                  |");
-    console.log("| * Each question would be accompanied with 4 options, one of which is the correct option |");
-    console.log("| * Correct answer gives +10 points while incorrect answer fetches 0 points               |");
-    console.log("|                                                                                         |");
-    console.log(" -----------------------------------------------------------------------------------------");
+    console.log(" -------------------------------<< INSTRUCTIONS >>-----------------------------------------");
+    console.log("|                                                                                          |");
+    console.log(`| ${emoji.get('one')}  Here you would be presented with 5 questions related to programming contests          |`);
+    console.log(`| ${emoji.get('two')}  Each question would have a statement                                                  |`);
+    console.log(`| ${emoji.get('three')}  Each question would be accompanied with 4 options, one of which is the correct option |`);
+    console.log(`| ${emoji.get('four')}  Correct answer gives +10 points while incorrect answer fetches 0 points               |`);
+    console.log("|                                                                                          |");
+    console.log(" ------------------------------------------------------------------------------------------");
 
     for (let i = 0; i < 3; i++)
         console.log();
 }
 
 const promptUser = () => {
-  if (readlineSync.keyInYN('Press Y to continue else to exit the app...')) {
-      // seperate the first quiz question from this prompt to make it more readable
-      console.log(); console.log();
-  } else {
-    console.log("See you later...GoodBye :)");
-    process.exit(1);
-  }
+    if (readlineSync.keyInYN(chalk.yellow('Press Y to continue else to exit the app...'))) {
+        // seperate the first quiz question from this prompt to make it more readable
+        console.log(); console.log();
+    } else {
+        console.log(`See you later...GoodBye ${emoji.get('rocket')}`);
+        process.exit(1);
+    }
 }
 
 class question {
@@ -91,11 +93,11 @@ class question {
     printResult() {
         this.userResponse = readlineSync.questionInt("Enter the correct option ----> \n");
         if (this.checkResponse()) {
-            console.log("Correct Answer!!");
+            console.log(chalk.green("Correct Answer!!"));
             score += DELTA;
         } else {
             const correctIndex = this.correctOption - 1;
-            console.log(`Incorrect Answer! The correct answer is ${this.options[correctIndex]}`);
+            console.log(chalk.red("Incorrect Answer!") + ` The correct answer is ${chalk.green(this.options[correctIndex])}`);
         }
         console.log();
     }
@@ -120,31 +122,31 @@ const removeFirstQuestion = () => {
 }
 
 const removeAnyQuestion = (idx) => {
-  idx -= 1;
-  quizStatements.splice(idx, 1);
-  totalScore -= DELTA;
+    idx -= 1;
+    quizStatements.splice(idx, 1);
+    totalScore -= DELTA;
 }
 
 const setupQuizApp = () => {
     // add / remove questions here
-    addQuestion("Who is the only 7 times Google Code Jam winner?", "Petr", "Radewoosh", "tourist", "rng_98", 3);
+    addQuestion("What kind of a language is JavaScript?", "Statically Typed", "Strongly Typed", "Weakly Typed", "Dynamically Typed", 3);
 
-    addQuestion("Which is the planet's oldest and largest programming competition?", "IOI", "Google Code Jam", "ICPC", "Facebook HackerCup", 3);
+    addQuestion("What type of variables cannot be reassigned in JS?", "const", "var", "let", "none of these", 1);
 
-    addQuestion("Who is the competitive programmer from India in honour of whom Topcoder orgnaizes a round every year?", "Anudeep Nekkanti", "Harsha a.k.a Humblefool", "Ajay Verma a.k.a djdolls", "Akashdeep Nain", 2);
+    addQuestion("Which of the following contains invalid primitive data types?", "boolean, undefined", "integer, float", "string, number", "number, boolean", 2);
 
-    addQuestion("Which of the following is a Japanese Online Judge?", "Codeforces", "Atcoder", "Codermarshal", "Light OJ", 2);
+    addQuestion("What is the builtin method in JavaScript to return the length of a string?", "length()", "size()", "index()", "none of these", 1);
 
-    addQuestion("Which algorithm is used to find LCA of a tree in O(log(n)) per query?", "Binary Lifting", "Binary Search", "MO's Algorithm", "Depth First Search", 1);   
+    addQuestion("Which of the following methods is used to check if a key exists in an object in JS?", "hasOwnKey", "hasOwnProperty", "hasOwnValue", "includes()", 2);
 }
 
 const printScore = () => {
     console.log();
     console.log("***************************************************************************");
     if (score === totalScore) {
-        console.log(` Wohooo!!!! Way to go!  Your Score: ${score} / ${totalScore}`);
+        console.log(` Wohooo!!!! Way to go!  Your Score: ${score} / ${totalScore} ${emoji.get('fire')}`);
     } else if (score > 0) {
-        console.log(` Good Job!! Your Score: ${score} / ${totalScore}`);
+        console.log(` Good Job!! Your Score: ${score} / ${totalScore} ${emoji.get('star')}`);
     } else {
         console.log(` You should give it another try :) Your Score: ${score} / ${totalScore}`);
     }
