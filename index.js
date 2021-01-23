@@ -1,10 +1,10 @@
+const readLineSync = require('readline-sync');
 const chalk = require('chalk');
 const emoji = require('node-emoji');
-const readLineSync = require('readline-sync');
+const { Question } = require('./Question');
 const { instructions } = require('./instructions');
 const { welcomeMessage } = require('./greet');
 const { begin, end } = require(`./timer`);
-
 // score obtained by the user
 let score = 0;
 // total score for the quiz -> updates with new questions being added or removed
@@ -22,53 +22,18 @@ const promptUser = () => {
     }
 }
 
-class Question {
-    constructor(query, option1, option2, option3, option4, correctOption) {
-        this.quizQuestion = query;
-        this.options = [];
-        this.options[0] = option1;
-        this.options[1] = option2;
-        this.options[2] = option3;
-        this.options[3] = option4;
-        this.userResponse = "";
-        this.correctOption = correctOption;
+const printResult = question => {
+    begin();
+    question.userResponse = readLineSync.questionInt("Enter the correct option ----> \n");
+    if (question.checkResponse()) {
+        console.log(chalk.green("Correct Answer!!"));
+        score += DELTA;
+    } else {
+        const correctIndex = question.correctOption - 1;
+        console.log(chalk.red("Incorrect Answer!") + ` The correct answer is ${chalk.green(question.options[correctIndex])}`);
     }
-
-    display() {
-        console.log("Q: " + this.quizQuestion);
-    }
-
-    displayOptions() {
-        console.log("Choose any one of the following options : ");
-
-        this.options.forEach((option, optionIndex) => {
-            console.log(`[${optionIndex + 1}] ${option}`);
-        });
-    }
-
-    printQuestion() {
-        this.display();
-        console.log();
-        this.displayOptions();
-    }
-
-    checkResponse() {
-        return (this.userResponse === this.correctOption);
-    }
-
-    printResult() {
-        begin();
-        this.userResponse = readLineSync.questionInt("Enter the correct option ----> \n");
-        if (this.checkResponse()) {
-            console.log(chalk.green("Correct Answer!!"));
-            score += DELTA;
-        } else {
-            const correctIndex = this.correctOption - 1;
-            console.log(chalk.red("Incorrect Answer!") + ` The correct answer is ${chalk.green(this.options[correctIndex])}`);
-        }
-        end();
-        console.log();
-    }
+    end();
+    console.log();
 }
 
 const quizStatements = [];
@@ -86,7 +51,7 @@ const removeQuestion = (idx) => {
 
 const setupQuizApp = () => {
     // add / remove questions here
-    addQuestion("What kind of a language is JavaScript?", "Statically Typed", "Strongly Typed", "Weakly Typed", "Dynamically Typed", 3);
+    addQuestion("What kind of a language is JavaScript?", "Statically Typed", "Strongly Typed", "Weakly Typed", "Dynamically Typed", 4);
 
     addQuestion("What type of variables cannot be reassigned in JS?", "const", "var", "let", "none of these", 1);
 
@@ -119,7 +84,7 @@ const runQuizApp = () => {
     // loops over all questions, displays them and finds the result
     quizStatements.forEach((item) => {
         item.printQuestion();
-        item.printResult();
+        printResult(item);
     })
 
     // post game print the score to the user
