@@ -1,6 +1,10 @@
-const readlineSync = require('readline-sync');
 const chalk = require('chalk');
 const emoji = require('node-emoji');
+const readLineSync = require('readline-sync');
+const { instructions } = require('./instructions');
+const { welcomeMessage } = require('./greet');
+const { begin, end } = require(`./timer`);
+
 // score obtained by the user
 let score = 0;
 // total score for the quiz -> updates with new questions being added or removed
@@ -8,45 +12,8 @@ let totalScore = 0;
 // bonus for a correct answer
 const DELTA = 10;
 
-// greeting message
-const welcomeMessage = () => {
-    const userName = readlineSync.question("Hello there! Please enter your name..\n");
-    console.log(chalk.green(`Hello ${userName}, welcome to the Quiz!` + emoji.get('fire')));
-    console.log();
-    console.log("------------------------------------------------------");
-    console.log("******************************************************");
-    console.log("               _____________________                   ");
-    console.log("              |                     |                  ");
-    console.log("              | Welcome to CLI-QUIZ |                  ");
-    console.log("              |_____________________|                  ");
-    console.log();
-    console.log("  A CLI Quiz app for budding JavaScript programmers   ");
-    console.log(`            Made with ${emoji.get('heart')}  and ${chalk.green('JavaScript')}               `);
-    console.log();
-    console.log("******************************************************");
-    console.log("------------------------------------------------------");
-}
-
-const instructions = () => {
-
-    for (let i = 0; i < 2; i++)
-        console.log();
-
-    console.log(" -------------------------------<< INSTRUCTIONS >>-----------------------------------------");
-    console.log("|                                                                                          |");
-    console.log(`| ${emoji.get('one')}  Here you would be presented with 5 questions related to programming contests          |`);
-    console.log(`| ${emoji.get('two')}  Each question would have a statement                                                  |`);
-    console.log(`| ${emoji.get('three')}  Each question would be accompanied with 4 options, one of which is the correct option |`);
-    console.log(`| ${emoji.get('four')}  Correct answer gives +10 points while incorrect answer fetches 0 points               |`);
-    console.log("|                                                                                          |");
-    console.log(" ------------------------------------------------------------------------------------------");
-
-    for (let i = 0; i < 3; i++)
-        console.log();
-}
-
 const promptUser = () => {
-    if (readlineSync.keyInYN(chalk.yellow('Press Y to continue else to exit the app...'))) {
+    if (readLineSync.keyInYN(chalk.yellowBright('Press Y to continue else to exit the app...'))) {
         // seperate the first quiz question from this prompt to make it more readable
         console.log(); console.log();
     } else {
@@ -55,7 +22,7 @@ const promptUser = () => {
     }
 }
 
-class question {
+class Question {
     constructor(query, option1, option2, option3, option4, correctOption) {
         this.quizQuestion = query;
         this.options = [];
@@ -73,10 +40,9 @@ class question {
 
     displayOptions() {
         console.log("Choose any one of the following options : ");
-        let optionIndex = 0;
-        this.options.forEach((option) => {
-            optionIndex++;
-            console.log(`[${optionIndex}] ${option}`);
+
+        this.options.forEach((option, optionIndex) => {
+            console.log(`[${optionIndex + 1}] ${option}`);
         });
     }
 
@@ -91,7 +57,8 @@ class question {
     }
 
     printResult() {
-        this.userResponse = readlineSync.questionInt("Enter the correct option ----> \n");
+        begin();
+        this.userResponse = readLineSync.questionInt("Enter the correct option ----> \n");
         if (this.checkResponse()) {
             console.log(chalk.green("Correct Answer!!"));
             score += DELTA;
@@ -99,29 +66,19 @@ class question {
             const correctIndex = this.correctOption - 1;
             console.log(chalk.red("Incorrect Answer!") + ` The correct answer is ${chalk.green(this.options[correctIndex])}`);
         }
+        end();
         console.log();
     }
 }
 
-
 const quizStatements = [];
 
 const addQuestion = (prompt, firstOption, secondOption, thirdOption, fourthOption, correctOption) => {
-    quizStatements.push(new question(prompt, firstOption, secondOption, thirdOption, fourthOption, correctOption));
+    quizStatements.push(new Question(prompt, firstOption, secondOption, thirdOption, fourthOption, correctOption));
     totalScore += DELTA;
 }
 
-const removeLastQuestion = () => {
-    quizStatements.pop();
-    totalScore -= DELTA;
-}
-
-const removeFirstQuestion = () => {
-    quizStatements.shift();
-    totalScore -= DELTA;
-}
-
-const removeAnyQuestion = (idx) => {
+const removeQuestion = (idx) => {
     idx -= 1;
     quizStatements.splice(idx, 1);
     totalScore -= DELTA;
@@ -135,9 +92,9 @@ const setupQuizApp = () => {
 
     addQuestion("Which of the following contains invalid primitive data types?", "boolean, undefined", "integer, float", "string, number", "number, boolean", 2);
 
-    addQuestion("What is the builtin method in JavaScript to return the length of a string?", "length()", "size()", "index()", "none of these", 1);
+    addQuestion("What is the builtin attributes in JavaScript to return the length of a string?", "length", "size", "index", "none of these", 1);
 
-    addQuestion("Which of the following methods is used to check if a key exists in an object in JS?", "hasOwnKey", "hasOwnProperty", "hasOwnValue", "includes()", 2);
+    addQuestion("Which of the following methods is used to check if a key exists in an object in JS?", "hasOwnKey()", "hasOwnProperty()", "hasOwnValue()", "includes()", 2);
 }
 
 const printScore = () => {
@@ -154,14 +111,9 @@ const printScore = () => {
 }
 
 const runQuizApp = () => {
-    // processes all the questions for the quiz
     setupQuizApp();
-    // greets the user with a basic CLI design
     welcomeMessage();
-    // display the instructions to the user
     instructions();
-
-    // prompt user whether he wants to start the quiz or exit the app
     promptUser();
 
     // loops over all questions, displays them and finds the result
